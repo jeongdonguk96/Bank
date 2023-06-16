@@ -38,16 +38,21 @@ public class SecurityConfig {
         http.headers().frameOptions().disable(); // iframe 허용 안함
         http.csrf().disable(); // enable 시 포스트맨 작동하지 않음
         http.cors().configurationSource(corsConfigurationSource()); // cors 정책
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.formLogin().disable();
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // 세션 생성 정책
+        http.formLogin().disable(); // 폼 태그 로그인 방식 disable
         http.httpBasic().disable();
-        http.authorizeRequests()
+        http.authorizeRequests() // 인가 설정
                 .antMatchers("/api/s/**").authenticated()
                 .antMatchers("/api/admin/**").hasRole(String.valueOf(RoleEnum.ADMIN))
                 .anyRequest().permitAll();
-        http.exceptionHandling()
+        http.exceptionHandling() // 예외 설정
                 .authenticationEntryPoint((request, response, authenticationException)->{ // 예외 가로채기
-                    responseUtil.noAuthentication(response, "로그인을 진행해주세요");
+                    if (request.getRequestURI().contains("api/admin")) {
+                        responseUtil.noAuthorization(response, "요청에 대한 권한이 없습니다");
+                    }
+                    else if (request.getRequestURI().contains("api/s")) {
+                        responseUtil.noAuthentication(response, "로그인을 진행해주세요");
+                    }
                 });
 
         return http.build();
