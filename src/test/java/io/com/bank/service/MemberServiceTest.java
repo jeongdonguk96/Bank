@@ -37,11 +37,12 @@ public class MemberServiceTest extends DummyObject {
     @DisplayName("회원가입 테스트")
     public void join_test() {
         // given
-        JoinRequestDto joinRequestDto = new JoinRequestDto();
-        joinRequestDto.setUsername("minsu");
-        joinRequestDto.setPassword("1234");
-        joinRequestDto.setEmail("minsu@gmail.com");
-        joinRequestDto.setFullname("김민수");
+        JoinRequestDto joinRequestDto = JoinRequestDto.builder()
+                                                .username("minsu")
+                                                .password("1234")
+                                                .email("minsu@gmail.com")
+                                                .fullname("김민수")
+                                                .build();
 
         // stub 1 : "username에 어느 데이터를 넣어도 빈 Optional 객체를 반환한다"
         when(memberRepository.findByUsername(any())).thenReturn(Optional.empty());
