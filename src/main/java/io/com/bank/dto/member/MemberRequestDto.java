@@ -2,8 +2,10 @@ package io.com.bank.dto.member;
 
 import io.com.bank.domain.Member;
 import io.com.bank.domain.RoleEnum;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.validation.constraints.NotEmpty;
@@ -15,6 +17,8 @@ public class MemberRequestDto {
     // 요청으로 받을 dto 객체 ( 패스워드 인코딩도 실시 )
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class JoinRequestDto {
 
         @Pattern(regexp = "^[a-zA-Z0-9]{2,20}$", message = "영문/숫자로 2~20자 이내로 작성해주세요")
