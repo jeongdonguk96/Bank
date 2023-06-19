@@ -14,7 +14,14 @@ import javax.validation.constraints.Size;
 
 public class MemberRequestDto {
 
-    // 요청으로 받을 dto 객체 ( 패스워드 인코딩도 실시 )
+    // 요청으로 받을 로그인 dto 객체 ( 패스워드 인코딩도 실시 )
+    @Data
+    public static class LoginRequestDto {
+        private String username;
+        private String password;
+    }
+
+    // 요청으로 받을 회원가입 dto 객체 ( 패스워드 인코딩도 실시 )
     @Data
     @Builder
     @NoArgsConstructor
