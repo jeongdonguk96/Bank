@@ -7,6 +7,7 @@ import io.com.bank.dto.member.MemberResponseDto.LoginResponseDto;
 import io.com.bank.util.CustomResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,7 +29,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
-        setFilterProcessesUrl("/api/login"); // 로그인 url 지정
+        setFilterProcessesUrl("/api/login"); // 로그인 url 지정. JwtAuthenticationFilter 필터는 이 URL로 로그인 요청하는 것에만 작동하는 필터임
         this.authenticationManager = authenticationManager;
     }
 
@@ -40,16 +41,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
+
+            // 로그인 요청 시 들어온 데이터를 LoginRequestDto로 변환
             LoginRequestDto loginRequestDto = objectMapper.readValue(request.getInputStream(), LoginRequestDto.class);
 
-            // 강제 로그인
+            // 강제 로그인. 이 토큰은 JWT가 아니라 인증 토큰
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                     loginRequestDto.getUsername(), loginRequestDto.getPassword());
 
             // UserDetailsService의 loadUserByUsername()을 호출함
             return authenticationManager.authenticate(authenticationToken);
         } catch (Exception e) {
-            // SecurityConfig의 authenticationEntryPoint에 걸린다
             throw new InternalAuthenticationServiceException(e.getMessage());
         }
     }
@@ -57,7 +59,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     // 위 attemptAuthentication()가 성공해서 Authentication 객체가 반환되면 호출됨
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+                                            FilterChain chain, Authentication authResult) throws IOException, ServletException {
         log.info("========== successfulAuthentication 호출됨 ==========");
 
         CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
@@ -66,5 +69,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         LoginResponseDto loginResponseDto = new LoginResponseDto(userDetails.getMember());
         CustomResponseUtil.success(response, loginResponseDto);
+    }
+
+
+    // attemptAuthentication에서 try-catch에 걸려서 예외를 던질 때 호출됨 (로그인 실패 시)
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        CustomResponseUtil.fail(response, "로그인 실패", HttpStatus.UNAUTHORIZED);
     }
 }

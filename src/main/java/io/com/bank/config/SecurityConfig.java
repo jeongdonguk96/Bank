@@ -2,12 +2,14 @@ package io.com.bank.config;
 
 import io.com.bank.domain.RoleEnum;
 import io.com.bank.jwt.JwtAuthenticationFilter;
+import io.com.bank.jwt.JwtAuthorizationFilter;
 import io.com.bank.util.CustomResponseUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -25,6 +27,19 @@ public class SecurityConfig {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
 
+    // JWT 필터 등록
+    public static class CustomSecurityFilterManager extends AbstractHttpConfigurer<CustomSecurityFilterManager, HttpSecurity> {
+
+        @Override
+        public void configure(HttpSecurity builder) throws Exception {
+            AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
+            builder.addFilter(new JwtAuthenticationFilter(authenticationManager));
+            builder.addFilter(new JwtAuthorizationFilter(authenticationManager));
+            super.configure(builder);
+        }
+    }
+
+
     // 시큐리티 설정
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,31 +55,38 @@ public class SecurityConfig {
                 .antMatchers("/api/s/**").authenticated()
                 .antMatchers("/api/admin/**").hasRole(String.valueOf(RoleEnum.ADMIN))
                 .anyRequest().permitAll();
-        http.apply(new CustomSecurityFiltermanager()); // JWT 필터 등록
-        http.exceptionHandling() // 예외 설정
-                .authenticationEntryPoint((request, response, authenticationException)->{ // 예외 가로채기
-                    if (request.getRequestURI().contains("api/admin")) {
-                        CustomResponseUtil.noAuthorization(response, "요청에 대한 권한이 없습니다");
-                    }
-                    else if (request.getRequestURI().contains("api/s")) {
-                        CustomResponseUtil.noAuthentication(response, "로그인을 진행해주세요");
-                    }
+        http.apply(new CustomSecurityFilterManager()); // JWT 필터 등록
+//        http.apply(new AbstractHttpConfigurer<CustomSecurityFilterManager, HttpSecurity>() {
+//            @Override
+//            public void configure(HttpSecurity builder) throws Exception {
+//                AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
+//                builder.addFilter(new JwtAuthenticationFilter(authenticationManager));
+//                super.configure(builder);
+//            }
+//        });
+//        http.exceptionHandling() // 인증 예외 설정
+//                .authenticationEntryPoint((request, response, authenticationException)->{ // 예외 가로채기
+//                        CustomResponseUtil.fail(response, "로그인을 진행해주세요", HttpStatus.UNAUTHORIZED);
+//                });
+        http.exceptionHandling() // 인가 예외 설정
+                .accessDeniedHandler((request, response, e) -> {
+                        CustomResponseUtil.fail(response, "권한이 없습니다", HttpStatus.FORBIDDEN);
                 });
 
         return http.build();
     }
 
 
-    // JWT 필터 등록
-    public class CustomSecurityFiltermanager extends AbstractHttpConfigurer<CustomSecurityFiltermanager, HttpSecurity> {
-
-        @Override
-        public void configure(HttpSecurity builder) throws Exception {
-            AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
-            builder.addFilter(new JwtAuthenticationFilter(authenticationManager));
-            super.configure(builder);
-        }
-    }
+//    // JWT 필터 등록
+//    public static class CustomSecurityFilterManager extends AbstractHttpConfigurer<CustomSecurityFilterManager, HttpSecurity> {
+//
+//        @Override
+//        public void configure(HttpSecurity builder) throws Exception {
+//            AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
+//            builder.addFilter(new JwtAuthenticationFilter(authenticationManager));
+//            super.configure(builder);
+//        }
+//    }
 
 
     // cors 정책 설정
