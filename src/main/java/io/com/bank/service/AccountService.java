@@ -3,7 +3,7 @@ package io.com.bank.service;
 import io.com.bank.domain.Account;
 import io.com.bank.domain.Member;
 import io.com.bank.dto.account.AccountRequestDto.CreateRequestDto;
-import io.com.bank.dto.account.AccountResponseDto.CreateResponseDto;
+import io.com.bank.dto.account.AccountResponseDto.*;
 import io.com.bank.exception.CustomApiException;
 import io.com.bank.repository.AccountRepository;
 import io.com.bank.repository.MemberRepository;
@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -46,4 +47,36 @@ public class AccountService {
         return new CreateResponseDto(savedAccount);
     }
 
+
+    // 계좌 목록 조회
+    @Transactional(readOnly = true)
+    public AccountListResponseDto getAccountList(Long memberId) {
+        Member findMember = memberRepository.findById(memberId).orElseThrow(
+                () -> new CustomApiException("사용자를 찾을 수 없습니다")
+        );
+
+        List<Account> findAccountList = accountRepository.findAllByMemberId(memberId);
+
+        return new AccountListResponseDto(findMember, findAccountList);
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
