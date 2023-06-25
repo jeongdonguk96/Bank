@@ -3,6 +3,7 @@ package io.com.bank.handler;
 import io.com.bank.dto.ResponseDto;
 import io.com.bank.exception.CustomApiException;
 import io.com.bank.exception.CustomForbiddenException;
+import io.com.bank.exception.CustomNotFoundException;
 import io.com.bank.exception.CustomValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +32,16 @@ public class CustomExceptionHandler {
     }
 
     @ExceptionHandler(CustomForbiddenException.class)
-    public ResponseEntity<?> validationException(CustomForbiddenException e) {
+    public ResponseEntity<?> forbiddenException(CustomForbiddenException e) {
         log.error(e.getMessage());
 
         return new ResponseEntity<>(new ResponseDto<>(-1, e.getMessage(), null), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(CustomNotFoundException.class)
+    public ResponseEntity<?> notFoundException(CustomNotFoundException e) {
+        log.error(e.getMessage());
+
+        return new ResponseEntity<>(new ResponseDto<>(-1, e.getMessage(), null), HttpStatus.NOT_FOUND);
     }
 }
