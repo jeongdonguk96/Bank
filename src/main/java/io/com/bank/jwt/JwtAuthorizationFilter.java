@@ -22,15 +22,18 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain chain) throws IOException, ServletException {
+
         if (isHeaderVerified(request, response)) {
 
             // 토큰으로 사용자를 검증하고 CustomUserDetails을 반환
             String token = request.getHeader(JwtVo.HEADER).replace(JwtVo.TOKEN_PREFIX, "");
             CustomUserDetails userDetails = JwtProcess.verify(token);
 
-            // 토큰에서 반환한 CustomUserDetails로 임시 세션을 생성하고 시큐리티 컨텍스트에 저장
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            // 토큰에서 반환한 CustomUserDetails로 Authentication 객체를 생성하고 시큐리티 컨텍스트에 저장
+            Authentication authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 

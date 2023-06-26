@@ -51,12 +51,16 @@ public class AccountService {
     // 계좌 목록 조회
     @Transactional(readOnly = true)
     public AccountListResponseDto getAccountList(Long memberId) {
+
+        // 사용자 존재 여부 확인
         Member findMember = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomApiException("사용자를 찾을 수 없습니다")
         );
 
+        // 계좌 목록 조회
         List<Account> findAccountList = accountRepository.findAllByMemberId(memberId);
 
+        // Dto로 응답
         return new AccountListResponseDto(findMember, findAccountList);
     }
 
