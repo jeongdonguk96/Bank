@@ -111,4 +111,31 @@ public class RegexpTest {
         assertThat(result3).isFalse();
     }
 
+    @Test
+    @DisplayName("구분 테스트")
+    void test7() {
+        String gubun = "DEPOSIT";
+        boolean result = Pattern.matches("DEPOSIT", gubun);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("구분 테스트2")
+    void test8() {
+        String gubun = "TRANSFER";
+        boolean result = Pattern.matches("DEPOSIT|TRANSFER", gubun);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("전화번호 테스트")
+    void test9() {
+        String tel = "01012345678";
+        boolean result = Pattern.matches("^[0-9]{11}$", tel);
+
+        assertThat(result).isTrue();
+    }
+
 }

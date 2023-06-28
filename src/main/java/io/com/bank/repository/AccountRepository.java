@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
+//    @Query("SELECT ac FROM Account ac JOIN FETCH ac.member m WHERE ac.number =:number")
     Optional<Account> findByNumber(Long number);
 
     List<Account> findAllByMemberId(Long memberId);

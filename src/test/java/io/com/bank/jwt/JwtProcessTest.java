@@ -32,16 +32,19 @@ class JwtProcessTest {
     @DisplayName("JWT 검증 테스트")
     void verify_test() {
         // given
-        String jwtToken =
-                "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYW5rIiwicm9sZSI6IkNVU1RPTUVSIiwiaWQiOjEsImV4cCI6MTY4ODA0NTg0N30" +
-                        ".k24oLscfiDzJe_lrvaqqWNTIgtkmlsxF9LjD5TyyBUBb4sJYq2jnw8mglAtDwkGc0lAWD7ATnDGaG4gSP6HiXw";
+        Member member = Member.builder().id(1L).role(RoleEnum.CUSTOMER).build();
+        CustomUserDetails userDetails_create = new CustomUserDetails(member);
 
         // when
-        CustomUserDetails userDetails = JwtProcess.verify(jwtToken);
+        String jwtToken_full = JwtProcess.create(userDetails_create);
+        String jwtToken_replaced = jwtToken_full.replace(JwtVo.TOKEN_PREFIX, "");
+
+        // when
+        CustomUserDetails userDetails_verify = JwtProcess.verify(jwtToken_replaced);
 
         // then
-        assertEquals(1L, (long) userDetails.getMember().getId());
-        assertThat(userDetails.getMember().getRole()).isEqualTo(RoleEnum.CUSTOMER);
+        assertEquals(1L, (long) userDetails_verify.getMember().getId());
+        assertThat(userDetails_verify.getMember().getRole()).isEqualTo(RoleEnum.CUSTOMER);
 
     }
 }

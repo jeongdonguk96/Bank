@@ -1,5 +1,6 @@
 package io.com.bank.domain;
 
+import io.com.bank.exception.CustomApiException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,4 +43,16 @@ public class Account {
     @Column(nullable = false)
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    // 계좌주인 확인
+    public void checkOwner(Long memberId) {
+        if (member.getId() != memberId) {
+            throw new CustomApiException("계좌 소유자가 아닙니다");
+        }
+    }
+
+    // 입금
+    public void deposit(Long amount) {
+        balance = balance + amount;
+    }
 }

@@ -53,7 +53,7 @@ public class SecurityConfig {
         http.httpBasic().disable();
         http.authorizeRequests() // 인가 설정
                 .antMatchers("/api/s/**").authenticated()
-                .antMatchers("/api/admin/**").hasRole(String.valueOf(RoleEnum.ADMIN))
+                .antMatchers("/api/admin/**").hasRole(RoleEnum.ADMIN.toString())
                 .anyRequest().permitAll();
         http.apply(new CustomSecurityFilterManager()); // JWT 필터 등록
 //        http.apply(new AbstractHttpConfigurer<CustomSecurityFilterManager, HttpSecurity>() {

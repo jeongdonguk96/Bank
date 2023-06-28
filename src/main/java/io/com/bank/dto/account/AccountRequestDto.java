@@ -7,8 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 
 public class AccountRequestDto {
 
@@ -35,5 +34,29 @@ public class AccountRequestDto {
                     .member(member)
                     .build();
         }
+    }
+
+    // 요청으로 받을 입금 dto 객체
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class DepositRequestDto {
+
+        @NotNull
+        @Digits(integer = 8, fraction = 0)
+        private Long number;
+
+        @NotNull
+        @Min(100)
+        private Long amount;
+
+        @NotEmpty
+        @Pattern(regexp = "^(DEPOSIT)$")
+        private String gubun;
+
+        @NotEmpty
+        @Pattern(regexp = "^[0-9]{11}$")
+        private String tel;
     }
 }

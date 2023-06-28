@@ -11,18 +11,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.annotation.Transactional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Transactional
+@Sql("classpath:db/teardown.sql")
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class JwtAuthenticationFilterTest extends DummyObject {
@@ -51,6 +53,7 @@ class JwtAuthenticationFilterTest extends DummyObject {
         // when
         ResultActions resultActions = mvc.perform(post("/api/login").contentType(MediaType.APPLICATION_JSON).content(requestBody));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
         String jwtToken = resultActions.andReturn().getResponse().getHeader(JwtVo.HEADER);
 
         // then
@@ -72,7 +75,13 @@ class JwtAuthenticationFilterTest extends DummyObject {
         System.out.println("requestBody = " + requestBody);
 
         // when
-        mvc.perform(post("/api/login").contentType(MediaType.APPLICATION_JSON).content(requestBody)).andExpect(status().isUnauthorized());
+//        mvc.perform(post("/api/login").contentType(MediaType.APPLICATION_JSON).content(requestBody)).andExpect(status().isUnauthorized());
+        ResultActions resultActions = mvc.perform(post("/api/login").contentType(MediaType.APPLICATION_JSON).content(requestBody));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+        String status = String.valueOf(resultActions.andReturn().getResponse().getStatus());
 
+        // then
+        assertThat(status).isEqualTo(HttpStatus.UNAUTHORIZED.toString());
     }
 }

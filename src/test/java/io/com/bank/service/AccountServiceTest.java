@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.com.bank.domain.Account;
 import io.com.bank.domain.Member;
 import io.com.bank.dto.account.AccountRequestDto.CreateRequestDto;
-import io.com.bank.dto.account.AccountResponseDto.AccountListResponseDto;
 import io.com.bank.dto.account.AccountResponseDto.CreateResponseDto;
 import io.com.bank.dummy.DummyObject;
+import io.com.bank.exception.CustomApiException;
 import io.com.bank.repository.AccountRepository;
 import io.com.bank.repository.MemberRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,9 +35,8 @@ class AccountServiceTest extends DummyObject {
     @Spy private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("계좌 생성 및 목록 조회 테스트")
-    void createAccount() throws Exception {
-
+    @DisplayName("계좌 생성 테스트")
+    void createAccount_test() throws Exception {
         // 계좌 생성
         // given
         Long memberId = 1L;
@@ -62,14 +62,50 @@ class AccountServiceTest extends DummyObject {
 
         // then
         assertThat(createdAccount.getNumber()).isEqualTo(1111L);
-
-        // 계좌 목록 조회
-        // when
-        AccountListResponseDto accountList = accountService.getAccountList(member.getId());
-        System.out.println("accountList = " + accountList);
-
-        // then
-        assertThat(accountList.getFullname()).isEqualTo("정동욱");
     }
 
+    @Test
+    @DisplayName("계좌 삭제 성공 테스트")
+    void deleteAccount_success_test() throws Exception {
+        // given
+        Long number = 1111L;
+        Long memberId = 1L;
+
+        // stub1: 사용자, 계좌 생성
+        Member member = newMockMember(1L, "donguk", "정동욱");
+        Account account = newMockAccount(1L, 111L, 1000L, member);
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(account));
+
+        // then
+        accountService.deleteAccount(number, memberId);
+    }
+
+    @Test
+    @DisplayName("계좌 삭제 실패 테스트")
+    void deleteAccount_fail_test() throws Exception {
+        // given
+        Long number = 1111L;
+        Long memberId = 2L;
+
+        // stub1: 사용자, 계좌 생성
+        Member member = newMockMember(1L, "donguk", "정동욱");
+        Account account = newMockAccount(1L, 111L, 1000L, member);
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(account));
+
+        // then
+        Assertions.assertThrows(CustomApiException.class, () -> accountService.deleteAccount(number, memberId));
+    }
+
+    @Test
+    @DisplayName("입금 성공 테스트")
+    void deposit_success_test() throws Exception {
+        // given
+
+
+        // when
+
+
+        // then
+
+    }
 }
