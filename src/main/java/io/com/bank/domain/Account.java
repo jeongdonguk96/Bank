@@ -55,4 +55,23 @@ public class Account {
     public void deposit(Long amount) {
         balance = balance + amount;
     }
+
+    // 비밀번호 확인
+    public void checkPassword(Long password) {
+        if (this.password != password) {
+            throw new CustomApiException("비밀번호가 틀렸습니다");
+        }
+    }
+
+    // 계좌 금액 확인
+    public void checkBalance(Long amount) {
+        if (balance < amount) {
+            throw new CustomApiException("계좌 잔액이 부족합니다");
+        }
+    }
+
+    // 출금
+    public void withdraw(Long amount) {
+        balance = balance - amount;
+    }
 }

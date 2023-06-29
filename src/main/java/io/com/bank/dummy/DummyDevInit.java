@@ -21,6 +21,7 @@ public class DummyDevInit extends DummyObject{
     void init() {
         Member donguk = memberRepository.save(newMember("donguk", "정동욱"));
         accountRepository.save(newAccount(1111L, donguk));
+        System.out.println("DummyDataInit");
     }
 }
 

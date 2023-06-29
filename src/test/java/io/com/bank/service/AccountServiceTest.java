@@ -3,12 +3,17 @@ package io.com.bank.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.com.bank.domain.Account;
 import io.com.bank.domain.Member;
+import io.com.bank.domain.Transaction;
+import io.com.bank.domain.TransactionEnum;
 import io.com.bank.dto.account.AccountRequestDto.CreateRequestDto;
+import io.com.bank.dto.account.AccountRequestDto.DepositRequestDto;
 import io.com.bank.dto.account.AccountResponseDto.CreateResponseDto;
+import io.com.bank.dto.account.AccountResponseDto.DepositResponseDto;
 import io.com.bank.dummy.DummyObject;
 import io.com.bank.exception.CustomApiException;
 import io.com.bank.repository.AccountRepository;
 import io.com.bank.repository.MemberRepository;
+import io.com.bank.repository.TransactionRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,6 +37,7 @@ class AccountServiceTest extends DummyObject {
     @InjectMocks private AccountService accountService;
     @Mock private MemberRepository memberRepository;
     @Mock private AccountRepository accountRepository;
+    @Mock private TransactionRepository transactionRepository;
     @Spy private ObjectMapper objectMapper;
 
     @Test
@@ -100,12 +106,29 @@ class AccountServiceTest extends DummyObject {
     @DisplayName("입금 성공 테스트")
     void deposit_success_test() throws Exception {
         // given
+        // stub1: 사용자, 계좌 생성
+        Member member = newMockMember(1L, "donguk", "정동욱");
+        Account account = newMockAccount(1L, 1111L, 1000L, member);
 
+        DepositRequestDto depositRequestDto = new DepositRequestDto();
+        depositRequestDto.setNumber(account.getNumber());
+        depositRequestDto.setAmount(1000L);
+        depositRequestDto.setGubun(String.valueOf(TransactionEnum.DEPOSIT));
+        depositRequestDto.setTel("01012345678");
+
+        // stub2: 입금계좌 존재
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(account));
+
+        // stub3: 트랜잭션 존재
+        Transaction transaction = newMockDepositTransaction(1L, account);
+        when(transactionRepository.save(any())).thenReturn(transaction);
 
         // when
-
+        DepositResponseDto depositResponseDto = accountService.deposit(depositRequestDto);
+        String responseBody = objectMapper.writeValueAsString(depositResponseDto);
+        System.out.println("responseBody = " + responseBody);
 
         // then
-
+        assertThat(depositResponseDto.getNumber()).isEqualTo(1111L);
     }
 }

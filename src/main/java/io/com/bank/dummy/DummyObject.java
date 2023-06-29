@@ -1,8 +1,6 @@
 package io.com.bank.dummy;
 
-import io.com.bank.domain.Account;
-import io.com.bank.domain.Member;
-import io.com.bank.domain.RoleEnum;
+import io.com.bank.domain.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -66,6 +64,23 @@ public class DummyObject {
                 .password(1234L)
                 .balance(balance)
                 .member(member)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    protected Transaction newMockDepositTransaction(Long id, Account findAccount) {
+        return Transaction.builder()
+                .id(id)
+                .depositAccount(findAccount)
+                .withdrawAccount(null)
+                .depositAccountBalance(findAccount.getBalance())
+                .withdrawAccountBalance(null)
+                .amount(1000L)
+                .gubun(TransactionEnum.DEPOSIT)
+                .sender("ATM")
+                .receiver(findAccount.getNumber().toString())
+                .tel("01012345678")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

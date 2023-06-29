@@ -5,7 +5,12 @@ import io.com.bank.domain.Member;
 import io.com.bank.domain.Transaction;
 import io.com.bank.domain.TransactionEnum;
 import io.com.bank.dto.account.AccountRequestDto.*;
+import io.com.bank.dto.account.AccountRequestDto.CreateRequestDto;
+import io.com.bank.dto.account.AccountRequestDto.DepositRequestDto;
 import io.com.bank.dto.account.AccountResponseDto.*;
+import io.com.bank.dto.account.AccountResponseDto.AccountListResponseDto;
+import io.com.bank.dto.account.AccountResponseDto.CreateResponseDto;
+import io.com.bank.dto.account.AccountResponseDto.DepositResponseDto;
 import io.com.bank.exception.CustomApiException;
 import io.com.bank.repository.AccountRepository;
 import io.com.bank.repository.MemberRepository;
@@ -103,10 +108,10 @@ public class AccountService {
 
         // 거래내역 남기기
         Transaction transaction = Transaction.builder()
-                .depositAccount(findAccount)
-                .withdrawAccount(null)
-                .depositAccountBalance(findAccount.getBalance())
-                .withdrawAccountBalance(null)
+                .withdrawAccount(findAccount)
+                .depositAccount(null)
+                .withdrawAccountBalance(findAccount.getBalance())
+                .depositAccountBalance(null)
                 .amount(depositRequestDto.getAmount())
                 .gubun(TransactionEnum.DEPOSIT)
                 .sender("ATM")
@@ -118,6 +123,50 @@ public class AccountService {
 
         return new DepositResponseDto(findAccount, savedTransaction);
     }
+
+    // 출금
+    @Transactional
+    public WithdrawResponseDto withdraw(WithdrawRequestDto withdrawRequestDto, Long memberId) {
+        // 100원 이하 체크
+        if (withdrawRequestDto.getAmount() < 100L) {
+            throw new CustomApiException("100원 미만의 금액은 출금할 수 없습니다.");
+        }
+
+        // 계좌 확인
+        Account findAccount = accountRepository.findByNumber(withdrawRequestDto.getNumber()).orElseThrow(
+                () -> new CustomApiException("계좌를 찾을 수 없습니다")
+        );
+
+        // 춢금 소유자 확인
+        findAccount.checkOwner(memberId);
+
+        // 춢금 비밀번호 확인
+        findAccount.checkPassword(withdrawRequestDto.getPassword());
+
+        // 출금계좌 잔액 확인
+        findAccount.checkBalance(withdrawRequestDto.getAmount());
+
+        // 출금
+        findAccount.withdraw(withdrawRequestDto.getAmount());
+
+        // 기록
+        Transaction transaction = Transaction.builder()
+                .withdrawAccount(findAccount)
+                .depositAccount(null)
+                .withdrawAccountBalance(findAccount.getBalance())
+                .depositAccountBalance(null)
+                .amount(withdrawRequestDto.getAmount())
+                .gubun(TransactionEnum.WITHDRAW)
+                .sender(String.valueOf(withdrawRequestDto.getNumber()))
+                .receiver(withdrawRequestDto.getNumber().toString())
+                .build();
+
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        // 응답
+        return new WithdrawResponseDto(findAccount, savedTransaction);
+    }
+
 
 }
 

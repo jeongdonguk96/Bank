@@ -2,6 +2,8 @@ package io.com.bank.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.com.bank.domain.Member;
+import io.com.bank.domain.TransactionEnum;
+import io.com.bank.dto.account.AccountRequestDto;
 import io.com.bank.dto.account.AccountRequestDto.CreateRequestDto;
 import io.com.bank.dummy.DummyObject;
 import io.com.bank.exception.CustomApiException;
@@ -86,7 +88,6 @@ public class AccountControllerTest extends DummyObject {
     }
 
 
-
     @Test
     @DisplayName("계좌 삭제 실패 테스트")
     @WithUserDetails(value = "donguk", setupBefore = TestExecutionEvent.TEST_EXECUTION)
@@ -101,5 +102,29 @@ public class AccountControllerTest extends DummyObject {
 
         // then
         resultActions.andExpect(status().isBadRequest());
+    }
+
+
+    @Test
+    @DisplayName("입금 성공 테스트")
+    @WithUserDetails(value = "donguk", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    void deposit_test_success() throws Exception {
+        // given
+        AccountRequestDto.DepositRequestDto depositRequestDto = new AccountRequestDto.DepositRequestDto();
+        depositRequestDto.setNumber(1111L);
+        depositRequestDto.setAmount(1000L);
+        depositRequestDto.setGubun(String.valueOf(TransactionEnum.DEPOSIT));
+        depositRequestDto.setTel("01012345678");
+
+        String requestBody = objectMapper.writeValueAsString(depositRequestDto);
+        System.out.println("requestBody = " + requestBody);
+
+        // when
+        ResultActions resultActions = mvc.perform(post("/api/account/deposit").contentType(MediaType.APPLICATION_JSON).content(requestBody));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+
+        // then
+        resultActions.andExpect(status().isOk());
     }
 }

@@ -59,4 +59,28 @@ public class AccountRequestDto {
         @Pattern(regexp = "^[0-9]{11}$")
         private String tel;
     }
+
+    // 요청으로 받을 출금 dto 객체
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class WithdrawRequestDto {
+
+        @NotNull
+        @Digits(integer = 8, fraction = 0)
+        private Long number;
+
+        @NotNull
+        @Digits(integer = 4, fraction = 0)
+        private Long password;
+
+        @NotEmpty
+        @Pattern(regexp = "^(DEPOSIT)$")
+        private String gubun;
+
+        @NotEmpty
+        @Pattern(regexp = "WITHDRAW")
+        private Long amount;
+    }
 }
