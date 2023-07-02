@@ -1,6 +1,7 @@
 package io.com.bank.dummy;
 
 import io.com.bank.domain.*;
+import io.com.bank.repository.AccountRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -83,6 +84,66 @@ public class DummyObject {
                 .tel("01012345678")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    protected Transaction newWithdrawTransaction(Account account, AccountRepository accountRepository) {
+        account.withdraw(100L);
+
+        if (accountRepository != null) {
+            accountRepository.save(account);
+        }
+
+        return Transaction.builder()
+                .withdrawAccount(account)
+                .depositAccount(null)
+                .withdrawAccountBalance(account.getBalance())
+                .depositAccountBalance(null)
+                .amount(100L)
+                .gubun(TransactionEnum.WITHDRAW)
+                .sender(String.valueOf(account.getMember().getFullname()))
+                .receiver(null)
+                .build();
+    }
+
+    protected Transaction newDepositTransaction(Account account, AccountRepository accountRepository) {
+        account.deposit(100L);
+
+        if (accountRepository != null) {
+            accountRepository.save(account);
+        }
+
+        return Transaction.builder()
+                .withdrawAccount(null)
+                .depositAccount(account)
+                .withdrawAccountBalance(null)
+                .depositAccountBalance(account.getBalance())
+                .amount(100L)
+                .gubun(TransactionEnum.DEPOSIT)
+                .sender("ATM")
+                .receiver(String.valueOf(account.getMember().getFullname()))
+                .tel("01012345678")
+                .build();
+    }
+
+    protected Transaction newTransferTransaction(Account withdrawAccount, Account depositAccount, AccountRepository accountRepository) {
+        withdrawAccount.withdraw(100L);
+        depositAccount.deposit(100L);
+
+        if (accountRepository != null) {
+            accountRepository.save(withdrawAccount);
+            accountRepository.save(depositAccount);
+        }
+
+        return Transaction.builder()
+                .withdrawAccount(withdrawAccount)
+                .depositAccount(depositAccount)
+                .withdrawAccountBalance(withdrawAccount.getBalance())
+                .depositAccountBalance(depositAccount.getBalance())
+                .amount(100L)
+                .gubun(TransactionEnum.TRANSFER)
+                .sender(String.valueOf(withdrawAccount.getMember().getFullname()))
+                .receiver(String.valueOf(depositAccount.getMember().getFullname()))
                 .build();
     }
 }

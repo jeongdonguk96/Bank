@@ -99,6 +99,7 @@ public class SecurityConfig {
         corsConfiguration.addAllowedMethod("*"); // 모든 매서드 허용
         corsConfiguration.addAllowedOriginPattern("*"); // 모든 IP 주소 허용
         corsConfiguration.setAllowCredentials(true); // 서버는 클라이언트의 자격 증명을 포함하는 요청에 응답할 수 있음
+        corsConfiguration.addExposedHeader("Authorization"); // 로그인 응답 헤더에 Authorization을 노출 => 이래야 자바스크립트로 토큰에 접근 가능
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);

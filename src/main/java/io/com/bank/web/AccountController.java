@@ -2,8 +2,10 @@ package io.com.bank.web;
 
 import io.com.bank.auth.CustomUserDetails;
 import io.com.bank.dto.ResponseDto;
+import io.com.bank.dto.account.AccountRequestDto;
 import io.com.bank.dto.account.AccountRequestDto.CreateRequestDto;
 import io.com.bank.dto.account.AccountRequestDto.DepositRequestDto;
+import io.com.bank.dto.account.AccountResponseDto;
 import io.com.bank.dto.account.AccountResponseDto.AccountListResponseDto;
 import io.com.bank.dto.account.AccountResponseDto.CreateResponseDto;
 import io.com.bank.dto.account.AccountResponseDto.DepositResponseDto;
@@ -57,9 +59,45 @@ public class AccountController {
     @PostMapping("/account/deposit")
     public ResponseEntity<?> deposit(@RequestBody @Validated DepositRequestDto depositRequestDto,
                                      BindingResult bindingResult) {
-        DepositResponseDto savedDeposit = accountService.deposit(depositRequestDto);
+        DepositResponseDto depositedAccount = accountService.deposit(depositRequestDto);
 
-        return new ResponseEntity<>(new ResponseDto<>(1, "입금 완료", savedDeposit), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(1, "입금 완료", depositedAccount), HttpStatus.OK);
+    }
+
+
+    // 출금
+    @PostMapping("/s/account/withdraw")
+    public ResponseEntity<?> withdraw(@RequestBody @Validated AccountRequestDto.WithdrawRequestDto withdrawRequestDto,
+                                      BindingResult bindingResult,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        AccountResponseDto.WithdrawResponseDto withdrawnAccount = accountService.withdraw(withdrawRequestDto, userDetails.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "출금 완료", withdrawnAccount), HttpStatus.OK);
+    }
+
+
+    // 계좌이체
+    @PostMapping("/s/account/transfer")
+    public ResponseEntity<?> transfer(@RequestBody @Validated AccountRequestDto.TransferRequestDto transferRequestDto,
+                                      BindingResult bindingResult,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        AccountResponseDto.TransferResponseDto transferResponseDto = accountService.transfer(transferRequestDto, userDetails.getMember().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "계좌이체 완료", transferResponseDto), HttpStatus.OK);
+    }
+
+
+    // 계좌 상세 보기
+    @GetMapping("/s/account/{number}")
+    public ResponseEntity<?> getAccountDetail(@PathVariable Long number,
+                                      @RequestParam(value = "page", defaultValue = "0") int page,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        AccountResponseDto.AccountDetailResponseDto findAccountDetail = accountService.getAccountDetail(number, userDetails.getMember().getId(), page);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "계좌 상세 보기 완료", findAccountDetail), HttpStatus.OK);
     }
 
 }

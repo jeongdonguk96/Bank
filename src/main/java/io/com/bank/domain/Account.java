@@ -1,10 +1,7 @@
 package io.com.bank.domain;
 
 import io.com.bank.exception.CustomApiException;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -58,7 +55,7 @@ public class Account {
 
     // 비밀번호 확인
     public void checkPassword(Long password) {
-        if (this.password != password) {
+        if (this.password.longValue() != password.longValue()) {
             throw new CustomApiException("비밀번호가 틀렸습니다");
         }
     }
@@ -72,6 +69,7 @@ public class Account {
 
     // 출금
     public void withdraw(Long amount) {
+        checkBalance(amount);
         balance = balance - amount;
     }
 }

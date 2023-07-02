@@ -79,9 +79,9 @@ class JwtAuthenticationFilterTest extends DummyObject {
         ResultActions resultActions = mvc.perform(post("/api/login").contentType(MediaType.APPLICATION_JSON).content(requestBody));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println("responseBody = " + responseBody);
-        String status = String.valueOf(resultActions.andReturn().getResponse().getStatus());
+        int status = resultActions.andReturn().getResponse().getStatus();
 
         // then
-        assertThat(status).isEqualTo(HttpStatus.UNAUTHORIZED.toString());
+        assertThat(status).isEqualTo(HttpStatus.UNAUTHORIZED.value());
     }
 }

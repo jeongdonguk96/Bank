@@ -41,7 +41,7 @@ class JwtAuthorizationFilterTest extends DummyObject {
         System.out.println("resultActions = " + resultActions.andReturn().getResponse().getStatus());
 
         // then
-        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(status().isNotFound());
     }
 
     @Test

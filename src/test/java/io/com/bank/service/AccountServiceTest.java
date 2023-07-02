@@ -5,6 +5,7 @@ import io.com.bank.domain.Account;
 import io.com.bank.domain.Member;
 import io.com.bank.domain.Transaction;
 import io.com.bank.domain.TransactionEnum;
+import io.com.bank.dto.account.AccountRequestDto;
 import io.com.bank.dto.account.AccountRequestDto.CreateRequestDto;
 import io.com.bank.dto.account.AccountRequestDto.DepositRequestDto;
 import io.com.bank.dto.account.AccountResponseDto.CreateResponseDto;
@@ -130,5 +131,75 @@ class AccountServiceTest extends DummyObject {
 
         // then
         assertThat(depositResponseDto.getNumber()).isEqualTo(1111L);
+    }
+
+    @Test
+    @DisplayName("출금 성공 테스트")
+    void withdraw_success_test() throws Exception {
+        // given
+        Long memberId = 1L;
+        Long password = 1234L;
+        Long amount = 100L;
+        Member member = newMockMember(1L, "donguk", "정동욱");
+        Account account = newMockAccount(1L, 1111L, 1000L, member);
+
+        // when
+        // 100원 이하 체크
+        if (amount < 100L) {
+            throw new CustomApiException("100원 미만의 금액은 출금할 수 없습니다.");
+        }
+        account.checkOwner(memberId);
+        account.checkPassword(password);
+//        account.checkBalance(amount);
+        account.withdraw(amount);
+
+        // then
+        assertThat(account.getBalance()).isEqualTo(900L);
+    }
+
+    @Test
+    @DisplayName("계좌이체 성공 테스트")
+    void transfer_success_test() throws Exception {
+        // given
+        Long amount = 500L;
+        Long password = 1234L;
+        Member member = newMockMember(1L, "donguk", "정동욱");
+        Account withdrawAccount = newMockAccount(1L, 1111L, 1000L, member);
+        Account depositAccount = newMockAccount(2L, 2222L, 1000L, member);
+
+        AccountRequestDto.TransferRequestDto transferRequestDto = new AccountRequestDto.TransferRequestDto();
+        transferRequestDto.setWithdrawNumber(withdrawAccount.getNumber());
+        transferRequestDto.setDepositNumber(depositAccount.getNumber());
+        transferRequestDto.setWithdrawPassword(password);
+        transferRequestDto.setAmount(amount);
+        transferRequestDto.setGubun(String.valueOf(TransactionEnum.TRANSFER));
+
+        // when
+        // 출금/입금 계좌가 다른지 확인
+        if (transferRequestDto.getWithdrawNumber().longValue() == transferRequestDto.getDepositNumber().longValue()) {
+            throw new CustomApiException("동일한 계좌로 이체할 수 없습니다");
+        }
+
+        // 100원 이하 체크
+        if (transferRequestDto.getAmount() < 100L) {
+            throw new CustomApiException("100원 미만의 금액은 이체할 수 없습니다.");
+        }
+
+        // 춢금 소유자 확인
+        withdrawAccount.checkOwner(member.getId());
+
+        // 춢금 비밀번호 확인
+        withdrawAccount.checkPassword(transferRequestDto.getWithdrawPassword());
+
+        // 출금계좌 잔액 확인
+        withdrawAccount.checkBalance(transferRequestDto.getAmount());
+
+        // 이체
+        withdrawAccount.withdraw(transferRequestDto.getAmount());
+        depositAccount.deposit(transferRequestDto.getAmount());
+
+        // then
+        assertThat(withdrawAccount.getBalance()).isEqualTo(500L);
+        assertThat(depositAccount.getBalance()).isEqualTo(1500L);
     }
 }

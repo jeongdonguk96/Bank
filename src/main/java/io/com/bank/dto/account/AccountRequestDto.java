@@ -76,11 +76,37 @@ public class AccountRequestDto {
         private Long password;
 
         @NotEmpty
-        @Pattern(regexp = "^(DEPOSIT)$")
+        @Pattern(regexp = "WITHDRAW")
         private String gubun;
 
+        @NotNull
+        private Long amount;
+    }
+
+    // 요청으로 받을 계좌이체 dto 객체
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TransferRequestDto {
+
+        @NotNull
+        @Digits(integer = 8, fraction = 0)
+        private Long withdrawNumber;
+
+        @NotNull
+        @Digits(integer = 8, fraction = 0)
+        private Long depositNumber;
+
+        @NotNull
+        @Digits(integer = 4, fraction = 0)
+        private Long withdrawPassword;
+
         @NotEmpty
-        @Pattern(regexp = "WITHDRAW")
+        @Pattern(regexp = "TRANSFER")
+        private String gubun;
+
+        @NotNull
         private Long amount;
     }
 }

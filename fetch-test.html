@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>로그인 페이지</h1>
+    <hr>
+    <form>
+        <input type="text" id="username" />
+        <input type="password" id="password" />
+        <button type="button" onclick="login()">로그인</button>
+    </form>
+
+    <script>
+        async function login() {
+            let memberDto = {
+                username:document.querySelector("#username").value,
+                password:document.querySelector("#password").value
+            }
+            console.log("memberDto = ", memberDto);
+
+            let memberJson = JSON.stringify(memberDto);
+            console.log("memberJson = ", memberJson);
+
+            let response1 = await fetch("http://localhost:8081/api/login", {
+                method: "post",
+                body: memberJson,
+                headers: {
+                    "Content-Type": "application/json; charset=utf-8"
+                }
+            });
+            console.log("response1.Authentication = ", response1.headers.get("Authorization"));
+
+            let response2 = await response1.json();
+            console.log("response2 = ", response2);
+        }
+    </script>
+</body>
+</html>
